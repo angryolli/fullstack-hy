@@ -29,6 +29,7 @@ const Person = (props) => {
   return (
     <div>
       {props.person.name} {props.person.number}
+      <button onClick={props.deletePerson}>delete</button>
     </div>
   )
 }
@@ -37,7 +38,11 @@ const Persons = (props) => {
   return (
     <div>
       {props.persons.map(person =>
-        <Person key={person.id} person={person} />
+        <Person
+          key={person.id}
+          person={person}
+          deletePerson={() => props.deletePerson(person)}
+        />
       )}
     </div>
   )
@@ -79,6 +84,16 @@ const App = () => {
       })
   }
 
+  const deletePerson = (person) => {
+    if (window.confirm(`Delete ${person.name} ?`)) {
+      personService
+        .remove(person.id)
+        .then(() => {
+          setPersons(persons.filter(p => p.id !== person.id))
+        })
+    }
+  }
+
   const handleNameChange = (event) => {
     setNewName(event.target.value)
   }
@@ -108,7 +123,7 @@ const App = () => {
         handleNumberChange={handleNumberChange}
       />
       <h3>Numbers</h3>
-      <Persons persons={personsToShow} />
+      <Persons persons={personsToShow} deletePerson={deletePerson} />
     </div>
   )
 }
