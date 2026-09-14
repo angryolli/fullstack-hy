@@ -55,8 +55,10 @@ const App = () => {
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
   const [notification, setNotification] = useState(null)
+  const [isError, setIsError] = useState(false)
 
-  const showNotification = (message) => {
+  const showNotification = (message, error = false) => {
+    setIsError(error)
     setNotification(message)
     setTimeout(() => {
       setNotification(null)
@@ -88,7 +90,14 @@ const App = () => {
             ))
             setNewName('')
             setNewNumber('')
-            showNotification(`Updated ${returnedPerson.name}`)
+            showNotification(`Updated ${returnedPerson.name}`)  // success notification
+          })
+          .catch(() => {
+            showNotification(
+              `Information of ${existingPerson.name} has already been removed from server`,
+              true
+            ) // error notification
+            setPersons(persons.filter(p => p.id !== existingPerson.id))
           })
       }
       return
@@ -138,7 +147,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={notification} />
+      <Notification message={notification} isError={isError} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h3>Add a new</h3>
       <PersonForm
