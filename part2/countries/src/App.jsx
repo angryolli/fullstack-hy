@@ -14,6 +14,7 @@ const Country = (props) => {
   return (
     <div>
       {props.country.name.common}
+      <button onClick={props.showCountry}>Show</button>
     </div>
   )
 }
@@ -22,7 +23,11 @@ const Countries = (props) => {
   return (
     <div>
       {props.countries.map(country =>
-        <Country key={country.cca3} country={country} />
+        <Country
+          key={country.cca3}
+          country={country}
+          showCountry={() => props.showCountry(country)}
+        />
       )}
     </div>
   )
@@ -53,6 +58,8 @@ const CountryInfo = (props) => {
 const App = () => {
   const [countries, setCountries] = useState([])
   const [filter, setFilter] = useState('')
+  const [selectedCountry, setSelectedCountry] = useState(null)
+  // country to show from the list
 
   useEffect(() => {
     countryService
@@ -64,14 +71,20 @@ const App = () => {
 
   const handleFilterChange = (event) => {
     setFilter(event.target.value)
+    setSelectedCountry(null) // reset the selected country when the filter changes
   }
 
-  const query = filter.trim().toLowerCase().replace(" ", "")
+  const showCountry = (country) => {
+    setSelectedCountry(country)
+  }
+
+  const query = filter.toLowerCase().replaceAll(' ', '')
 
   // filtered countries by query
   const countriesToShow = countries.filter(country =>
-    country.name.common.toLowerCase().includes(query)
+    country.name.common.toLowerCase().replaceAll(' ', '').includes(query)
   )
+  console.log('countriesToShow', countriesToShow)
 
   let content = null
   if (query !== '') {
@@ -79,8 +92,10 @@ const App = () => {
       content = <div>Too many matches, specify another filter</div>
     } else if (countriesToShow.length === 1) {
       content = <CountryInfo country={countriesToShow[0]} />
+    } else if (selectedCountry) {
+      content = <CountryInfo country={selectedCountry} />
     } else {
-      content = <Countries countries={countriesToShow} />
+      content = <Countries countries={countriesToShow} showCountry={showCountry} />
     }
   }
 
