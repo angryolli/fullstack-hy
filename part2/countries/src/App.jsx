@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import countryService from './services/countries'
+import weatherService from './services/weather'
 
 const Filter = (props) => {
   return (
@@ -33,16 +34,54 @@ const Countries = (props) => {
   )
 }
 
+const Weather = ({ capital }) => {
+  const [weather, setWeather] = useState(null)
+
+  // get weather data when the capital changes
+  useEffect(() => {
+    if (!capital) { return }
+
+    setWeather(null)
+    weatherService
+      .getWeather(capital)
+      .then(weatherData => {
+        setWeather(weatherData)
+      })
+  }, [capital])
+
+  // if no weather data, return null
+  if (!weather) {
+    return null
+  }
+  // console.log('capital', capital)
+  // console.log('weather', weather)
+
+  const icon = weather.weather[0].icon
+
+  return (
+    <div>
+      <h2>Weather in {capital}</h2>
+      <div>Temperature {weather.main.temp} Celsius</div>
+      <img
+        src={`https://openweathermap.org/img/wn/${icon}@2x.png`} // icon from older guide
+        alt={weather.weather[0].description}
+      />
+      <div>Wind {weather.wind.speed} m/s</div>
+    </div>
+  )
+}
+
 // exact country information
 const CountryInfo = (props) => {
   const country = props.country
   // get languages as an array of strings
   const languages = country.languages ? Object.values(country.languages) : []
+  const capital = country.capital ? country.capital[0] : ''
 
   return (
     <div>
       <h1>{country.name.common}</h1>
-      <div>Capital {country.capital ? country.capital[0] : ''}</div>
+      <div>Capital {capital}</div>
       <div>Area {country.area}</div>
       <h2>Languages</h2>
       <ul>
@@ -51,6 +90,7 @@ const CountryInfo = (props) => {
         )}
       </ul>
       <img src={country.flags.png} alt={`Flag of ${country.name.common}`} />
+      <Weather capital={capital} />
     </div>
   )
 }
@@ -84,7 +124,7 @@ const App = () => {
   const countriesToShow = countries.filter(country =>
     country.name.common.toLowerCase().replaceAll(' ', '').includes(query)
   )
-  console.log('countriesToShow', countriesToShow)
+  //console.log('countriesToShow', countriesToShow)
 
   let content = null
   if (query !== '') {
