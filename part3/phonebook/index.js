@@ -1,5 +1,6 @@
 const express = require('express')
 const morgan = require('morgan')
+const cors = require('cors')
 const app = express()
 
 let persons = [
@@ -26,6 +27,7 @@ let persons = [
 ]
 
 app.use(express.json())
+app.use(cors())
 
 morgan.token('body', (req) => {
   if (req.method === 'POST') {
@@ -74,6 +76,8 @@ const generateId = () => {
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
+  console.log(request.body)
+  console.log(typeof request.body)
 
   // three cases for error handling
   if (!body.name) {
